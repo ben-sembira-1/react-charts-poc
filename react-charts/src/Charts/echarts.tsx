@@ -53,13 +53,13 @@ export function EChart({ my_data }: ChartProps) {
         id: 'a',
         type: 'line',
         data: my_data.map((point) => (point.y.toFixed(3))),
-        symbol: false,
+        showSymbol: false,
       }
     ]
   };
 
   return (
-    <ChartBox title="chart.js">
+    <ChartBox title="Apache ECharts">
       <Box sx={{ backgroundColor: "white" }}>
         <ReactECharts
           option={my_options}

@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       console.log('Adding data!');
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 10; i++) {
         setData((oldData) => {
           const lastPoint = oldData[oldData.length - 1]
           const epsilon = Math.random() * 2 - 1
@@ -22,11 +22,11 @@ function App() {
           return [...oldData, newPoint]
         });
       }
-    }, 500);
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
-  const CUT = 100
+  const CUT = 200
   return (
     <Stack spacing={2} alignItems={"center"}>
       <Stack direction={'row'} spacing={2}>
