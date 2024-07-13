@@ -52,7 +52,8 @@ export function EChart({ my_data }: ChartProps) {
       {
         id: 'a',
         type: 'line',
-        data: my_data.map((point) => (point.y.toFixed(3)))
+        data: my_data.map((point) => (point.y.toFixed(3))),
+        symbol: false,
       }
     ]
   };
