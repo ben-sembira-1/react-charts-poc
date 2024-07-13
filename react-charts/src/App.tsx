@@ -5,20 +5,14 @@ import { useState } from 'react'
 import { LineChartData } from './Charts/ChartProps'
 import { ChartJs } from './Charts/ChartJS'
 
+const FULL_DATA: LineChartData = Array.from(Array(50).keys()).map(
+  x => ({ x: x, y: Math.random() * 10 })
+)
 
 function App() {
   const [shifted, setShifted] = useState<boolean>(false)
-  const FULL_DATA: LineChartData = [
-    { x: 1, y: 2 },
-    { x: 2, y: 5.5 },
-    { x: 3, y: 2 },
-    { x: 5, y: 8.5 },
-    { x: 8, y: 1.5 },
-    { x: 10, y: 5 },
-    { x: 11, y: 3 },
-  ]
 
-  const data = shifted ? FULL_DATA.slice(0, -1) : FULL_DATA.slice(1)
+  const data = shifted ? FULL_DATA.slice(0, -10) : FULL_DATA.slice(10)
 
   const toggleShifted = () => setShifted((previous: boolean) => !previous)
   return (

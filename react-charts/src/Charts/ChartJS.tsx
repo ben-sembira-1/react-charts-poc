@@ -1,4 +1,4 @@
-import { Line } from "react-chartjs-2";
+import { Line, Scatter } from "react-chartjs-2";
 import ChartProps from "./ChartProps";
 import { Box } from "@mui/material";
 import ChartBox from "./ChartBox";
@@ -12,6 +12,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  ChartData,
 } from 'chart.js';
 ChartJS.register(
   CategoryScale,
@@ -22,6 +23,12 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+import zoomPlugin from 'chartjs-plugin-zoom';
+ChartJS.register(
+  zoomPlugin
+);
+
+
 
 export function ChartJs({ my_data }: ChartProps) {
   const options = {
@@ -34,24 +41,38 @@ export function ChartJs({ my_data }: ChartProps) {
         display: true,
         text: 'Chart.js Line Chart',
       },
+      zoom: {
+        pan: {
+          enabled: true,
+          mode: 'xy',
+        },
+        zoom: {
+          wheel: {
+            enabled: true,
+          },
+          mode: 'xy',
+        }
+      }
     },
   };
+
+  const data: ChartData<"line"> = {
+    labels: my_data.map((point) => point.x),
+    datasets: [{
+      label: 'My Data',
+      data: my_data,
+      borderColor: 'rgb(255, 99, 132)',
+      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      animation: false,
+    }],
+  }
 
   return (
     <ChartBox title="chart.js">
       <Box sx={{ backgroundColor: "white" }}>
-        <Line
+        <Scatter
           options={options}
-          data={{
-            labels: my_data.map((point) => point.x),
-            datasets: [{
-              label: 'My Data',
-              data: my_data,
-              borderColor: 'rgb(255, 99, 132)',
-              backgroundColor: 'rgba(255, 99, 132, 0.5)',
-              animation: false,
-            }],
-          }}
+          data={data}
           height={300}
           width={500}
         />
