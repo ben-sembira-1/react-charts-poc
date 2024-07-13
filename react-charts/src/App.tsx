@@ -4,8 +4,9 @@ import { MuiChart } from './Charts/MuiChart'
 import { useState } from 'react'
 import { LineChartData } from './Charts/ChartProps'
 import { ChartJs } from './Charts/ChartJS'
+import { EChart } from './Charts/echarts'
 
-const FULL_DATA: LineChartData = Array.from(Array(50).keys()).map(
+const FULL_DATA: LineChartData = Array.from(Array(150).keys()).map(
   x => ({ x: x, y: Math.random() * 10 })
 )
 
@@ -23,6 +24,9 @@ function App() {
         </Box>
         <Box>
           <ChartJs my_data={data} />
+        </Box>
+        <Box>
+          <EChart my_data={data}/>
         </Box>
       </Stack>
       <Button sx={{ ":focus": { outline: "none !important" }, width: "5rem" }} onClick={toggleShifted}>{shifted ? "Move Left" : "Move Right"}</Button>
