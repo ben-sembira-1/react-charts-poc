@@ -2,8 +2,11 @@ import ChartProps, { LineChartData } from "./ChartProps";
 import { Box } from "@mui/material";
 import ChartBox, { ChartButton } from "./ChartBox";
 import ReactECharts from 'echarts-for-react';
-import { EChartsType } from 'echarts';
+import { ECharts } from 'echarts';
 import { useEffect, useState } from "react";
+
+
+const SET_OPTIONS_OVERRIDE_ALL = { notMerge: true }
 
 
 function createEChartsDataOptions(data: LineChartData) {
@@ -14,9 +17,6 @@ function createEChartsDataOptions(data: LineChartData) {
     },
     tooltip: {
       trigger: 'axis'
-    },
-    legend: {
-      data: ['my data legend']
     },
     xAxis: {
       data: data.map((point) => point.x),
@@ -120,27 +120,40 @@ function createEChartsFeaturesOptions(enableZoom: boolean, enableAutoZoom: boole
 }
 
 
+function set_restore_options_to_current_loaded(echartsInstance: ECharts) {
+  /* 
+  When pressing the restore button on the toolbar it sends the graph to the last options
+  that where set using override all settings (notMerge=true).
+  Because of that if not doing this after a call to setOption with merge (or replaceMerge) strategy 
+  the restore button will set the options back to the last ones that where set with notMerge=true 
+  which may be undesirable.
+   */
+  echartsInstance.setOption(echartsInstance.getOption(), SET_OPTIONS_OVERRIDE_ALL)
+}
+
+
 export function EChart({ myData }: ChartProps) {
   const [zoomEnabled, setEnableZoom] = useState(false);
   const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
-  const [echartsObject, setEchartsObject] = useState<EChartsType | undefined>(undefined)
+  const [echartsInstance, setEchartsObject] = useState<ECharts | undefined>(undefined)
 
   
   useEffect(() => {
-    if (echartsObject !== undefined) {
+    if (echartsInstance !== undefined) {
       if (!zoomEnabled) {
-        const REMOVE_ZOOM_SETTINGS_WHEN_DISABLING_ZOOM = true
-        echartsObject.setOption(createEChartsDataOptions(myData), { notMerge: REMOVE_ZOOM_SETTINGS_WHEN_DISABLING_ZOOM });
+        const REMOVE_ZOOM_SETTINGS_WHEN_DISABLING_ZOOM = SET_OPTIONS_OVERRIDE_ALL
+        echartsInstance.setOption(createEChartsDataOptions(myData), REMOVE_ZOOM_SETTINGS_WHEN_DISABLING_ZOOM);
       }
     }
-  }, [myData, zoomEnabled, echartsObject])
+  }, [myData, zoomEnabled, echartsInstance])
 
   useEffect(() => {
-    if (echartsObject !== undefined) {
+    if (echartsInstance !== undefined) {
       const PRESERVE_X_AXIS_ZOOM_ON_AUTO_MODE_TOGGLE = { replaceMerge: ["dataZoom"] }
-      echartsObject.setOption(createEChartsFeaturesOptions(zoomEnabled, autoZoomEnabled), PRESERVE_X_AXIS_ZOOM_ON_AUTO_MODE_TOGGLE);
+      echartsInstance.setOption(createEChartsFeaturesOptions(zoomEnabled, autoZoomEnabled), PRESERVE_X_AXIS_ZOOM_ON_AUTO_MODE_TOGGLE)
+      set_restore_options_to_current_loaded(echartsInstance)
     }
-  }, [zoomEnabled, echartsObject, autoZoomEnabled])
+  }, [zoomEnabled, echartsInstance, autoZoomEnabled])
 
   return (
     <ChartBox title="Apache ECharts">
