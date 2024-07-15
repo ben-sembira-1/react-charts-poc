@@ -4,7 +4,7 @@ import ChartProps from "./ChartProps";
 import { Box } from "@mui/material";
 
 
-export function MuiChart({ my_data: data }: ChartProps) {
+export function MuiChart({ myData: data }: ChartProps) {
   return (
     <ChartBox title="Mui Chart">
       <Box sx={{ backgroundColor: "white" }}>

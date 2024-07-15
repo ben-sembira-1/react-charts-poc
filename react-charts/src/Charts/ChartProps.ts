@@ -6,7 +6,7 @@ type SinglePoint = {
 export type LineChartData = SinglePoint[]
 
 type ChartProps = {
-  my_data: LineChartData
+  myData: LineChartData
 }
 
 export default ChartProps

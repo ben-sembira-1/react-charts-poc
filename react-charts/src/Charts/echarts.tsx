@@ -1,10 +1,13 @@
-import ChartProps from "./ChartProps";
-import { Box } from "@mui/material";
+import ChartProps, { LineChartData } from "./ChartProps";
+import { Box, Button } from "@mui/material";
 import ChartBox from "./ChartBox";
-import ReactECharts from 'echarts-for-react';
+import ReactECharts, { EChartsInstance } from 'echarts-for-react';
+import { EChartsType } from 'echarts';
+import { useEffect, useMemo, useState } from "react";
 
-export function EChart({ my_data }: ChartProps) {
-  const my_options = {
+
+function createEChartsOptions(data: LineChartData, enableZoom: boolean) {
+  const basic_line_options = {
     // animation: false,
     title: {
       text: 'ECharts Example'
@@ -16,7 +19,7 @@ export function EChart({ my_data }: ChartProps) {
       data: ['my data legend']
     },
     xAxis: {
-      data: my_data.map((point) => point.x),
+      data: data.map((point) => point.x),
       splitLine: {
         show: true
       }
@@ -26,6 +29,17 @@ export function EChart({ my_data }: ChartProps) {
         show: true
       }
     },
+    series: [
+      {
+        id: 'a',
+        type: 'line',
+        data: data.map((point) => (point.y.toFixed(3))),
+        showSymbol: false,
+      }
+    ]
+  };
+
+  const zoomOptions = {
     toolbox: {
       right: 10,
       feature: {
@@ -48,26 +62,54 @@ export function EChart({ my_data }: ChartProps) {
         filterMode: 'none'
       },
     ],
-    series: [
-      {
-        id: 'a',
-        type: 'line',
-        data: my_data.map((point) => (point.y.toFixed(3))),
-        showSymbol: false,
-      }
-    ]
-  };
+  }
+
+  const noZoomOptions = {
+    toolbox: {},
+    dataZoom: [],
+  }
+
+  return {
+    ...basic_line_options,
+    ...(enableZoom ? zoomOptions : noZoomOptions)
+  }
+}
+
+
+export function EChart({ myData }: ChartProps) {
+  const [zoomEnabled, setEnableZoom] = useState(false);
+  const [echartsObject, setEchartsObject] = useState<EChartsType | undefined>(undefined)
+  const [chartData, setChartData] = useState<LineChartData>([])
+
+  useEffect(() => {
+    if (!zoomEnabled) {
+      setChartData(myData)
+    }
+  }, [myData, zoomEnabled])
+
+  useEffect(() => {
+    const setOptionOptions = {
+      notMerge: true,
+      lazyUpdate: false
+    }
+    if (echartsObject !== undefined) {
+      echartsObject.setOption(createEChartsOptions(chartData, zoomEnabled), setOptionOptions);
+    }
+  }, [zoomEnabled, echartsObject, chartData])
 
   return (
     <ChartBox title="Apache ECharts">
       <Box sx={{ backgroundColor: "white" }}>
         <ReactECharts
-          option={my_options}
+          option={createEChartsOptions([], false)}
           // theme={"dark"}
           style={{ height: 300, width: 500 }}
+          lazyUpdate={true}
+          onChartReady={setEchartsObject}
         />
       </Box>
-    </ChartBox>
+      <Button onClick={() => setEnableZoom((prev) => !prev)}>{zoomEnabled ? "Disable Zoom" : "Enable Zoom"}</Button>
+    </ChartBox >
   )
 }
 

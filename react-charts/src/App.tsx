@@ -13,7 +13,7 @@ function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       console.log('Adding data!');
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 5; i++) {
         setData((oldData) => {
           const lastPoint = oldData[oldData.length - 1]
           const epsilon = Math.random() * 2 - 1
@@ -22,7 +22,7 @@ function App() {
           return [...oldData, newPoint]
         });
       }
-    }, 2000);
+    }, 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -31,16 +31,16 @@ function App() {
     <Stack spacing={2} alignItems={"center"}>
       <Stack direction={'row'} spacing={2}>
         <Box>
-          <MuiChart my_data={data.slice(-CUT)} />
+          <MuiChart myData={data.slice(-CUT)} />
         </Box>
         <Box>
-          <ChartJs my_data={data.slice(-CUT)} />
+          <ChartJs myData={data.slice(-CUT)} />
         </Box>
         <Box>
-          <EChart my_data={data.slice(-CUT)} />
+          <EChart myData={data.slice(-CUT)} />
         </Box>
         <Box>
-          <EChart my_data={data} />
+          <EChart myData={data} />
         </Box>
       </Stack>
     </Stack>

@@ -30,7 +30,7 @@ ChartJS.register(
 
 
 
-export function ChartJs({ my_data }: ChartProps) {
+export function ChartJs({ myData: my_data }: ChartProps) {
   const options = {
     responsive: true,
     plugins: {
