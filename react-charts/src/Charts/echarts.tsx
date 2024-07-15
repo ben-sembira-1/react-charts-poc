@@ -1,13 +1,13 @@
 import ChartProps, { LineChartData } from "./ChartProps";
-import { Box, Button } from "@mui/material";
+import { Box } from "@mui/material";
 import ChartBox, { ChartButton } from "./ChartBox";
-import ReactECharts, { EChartsInstance } from 'echarts-for-react';
+import ReactECharts from 'echarts-for-react';
 import { EChartsType } from 'echarts';
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 
-function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAutoZoom: boolean) {
-  const basic_line_options = {
+function createEChartsDataOptions(data: LineChartData) {
+  return {
     // animation: false,
     title: {
       text: 'ECharts Example'
@@ -38,6 +38,10 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAu
       }
     ]
   };
+}
+
+
+function createEChartsFeaturesOptions(enableZoom: boolean, enableAutoZoom: boolean) {
 
   const toolBoxOptions = {
     toolbox: {
@@ -55,14 +59,28 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAu
   const manualZoomOptions = {
     dataZoom: [
       {
+        id: "slider_x_zoom_for_keeping_zoom_on_toggle",
         type: 'slider',
         xAxisIndex: 0,
         filterMode: 'none',
       },
       {
+        id: "inside_x_zoom_for_keeping_zoom_on_toggle",
         type: 'inside',
         xAxisIndex: 0,
         filterMode: 'none',
+        zoomOnMouseWheel: 'shift',
+      },
+      {
+        type: 'slider',
+        yAxisIndex: 0,
+        filterMode: 'none',
+      },
+      {
+        type: 'inside',
+        yAxisIndex: 0,
+        filterMode: 'none',
+        zoomOnMouseWheel: 'ctrl',
       },
     ],
   }
@@ -70,14 +88,17 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAu
   const autoZoomOptions = {
     dataZoom: [
       {
+        id: "slider_x_zoom_for_keeping_zoom_on_toggle",
         type: 'slider',
         xAxisIndex: 0,
         filterMode: 'filter',
       },
       {
+        id: "inside_x_zoom_for_keeping_zoom_on_toggle",
         type: 'inside',
         xAxisIndex: 0,
         filterMode: 'filter',
+        zoomOnMouseWheel: true,
       },
     ]
   }
@@ -93,7 +114,6 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAu
   )
 
   return {
-    ...basic_line_options,
     ...toolBoxOptions,
     ...zoomOptions,
   }
@@ -102,30 +122,34 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAu
 
 export function EChart({ myData }: ChartProps) {
   const [zoomEnabled, setEnableZoom] = useState(false);
-  const [autoZoomEnabled, setAutoZoomEnabled] = useState(false);
+  const [autoZoomEnabled, setAutoZoomEnabled] = useState(true);
   const [echartsObject, setEchartsObject] = useState<EChartsType | undefined>(undefined)
-  const [chartData, setChartData] = useState<LineChartData>([])
 
+  
   useEffect(() => {
-    if (!zoomEnabled) {
-      setChartData(myData)
-    }
-  }, [myData, zoomEnabled])
-
-  useEffect(() => {
-    const setOptionOptions = {
-      notMerge: true
-    }
     if (echartsObject !== undefined) {
-      echartsObject.setOption(createEChartsOptions(chartData, zoomEnabled, autoZoomEnabled), setOptionOptions);
+      if (!zoomEnabled) {
+        const REMOVE_ZOOM_SETTINGS_WHEN_DISABLING_ZOOM = true
+        echartsObject.setOption(createEChartsDataOptions(myData), { notMerge: REMOVE_ZOOM_SETTINGS_WHEN_DISABLING_ZOOM });
+      }
     }
-  }, [zoomEnabled, echartsObject, chartData, autoZoomEnabled])
+  }, [myData, zoomEnabled, echartsObject])
+
+  useEffect(() => {
+    if (echartsObject !== undefined) {
+      const PRESERVE_X_AXIS_ZOOM_ON_AUTO_MODE_TOGGLE = { replaceMerge: ["dataZoom"] }
+      echartsObject.setOption(createEChartsFeaturesOptions(zoomEnabled, autoZoomEnabled), PRESERVE_X_AXIS_ZOOM_ON_AUTO_MODE_TOGGLE);
+    }
+  }, [zoomEnabled, echartsObject, autoZoomEnabled])
 
   return (
     <ChartBox title="Apache ECharts">
       <Box sx={{ backgroundColor: "white" }}>
         <ReactECharts
-          option={createEChartsOptions([], false, true)}
+          option={{
+            ...createEChartsDataOptions([]),
+            ...createEChartsFeaturesOptions(false, true)
+          }}
           // theme={"dark"}
           style={{ height: 300, width: 500 }}
           lazyUpdate={true}
