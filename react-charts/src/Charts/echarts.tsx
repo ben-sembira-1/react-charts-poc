@@ -1,12 +1,12 @@
 import ChartProps, { LineChartData } from "./ChartProps";
 import { Box, Button } from "@mui/material";
-import ChartBox from "./ChartBox";
+import ChartBox, { ChartButton } from "./ChartBox";
 import ReactECharts, { EChartsInstance } from 'echarts-for-react';
 import { EChartsType } from 'echarts';
 import { useEffect, useMemo, useState } from "react";
 
 
-function createEChartsOptions(data: LineChartData, enableZoom: boolean) {
+function createEChartsOptions(data: LineChartData, enableZoom: boolean, enableAutoZoom: boolean) {
   const basic_line_options = {
     // animation: false,
     title: {
@@ -39,7 +39,7 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean) {
     ]
   };
 
-  const zoomOptions = {
+  const toolBoxOptions = {
     toolbox: {
       right: 10,
       feature: {
@@ -49,35 +49,60 @@ function createEChartsOptions(data: LineChartData, enableZoom: boolean) {
         restore: {},
         saveAsImage: {}
       }
-    },
+    }
+  }
+
+  const manualZoomOptions = {
     dataZoom: [
       {
         type: 'slider',
         xAxisIndex: 0,
-        filterMode: 'none'
+        filterMode: 'none',
       },
       {
         type: 'inside',
         xAxisIndex: 0,
-        filterMode: 'none'
+        filterMode: 'none',
       },
     ],
   }
 
-  const noZoomOptions = {
-    toolbox: {},
-    dataZoom: [],
+  const autoZoomOptions = {
+    dataZoom: [
+      {
+        type: 'slider',
+        xAxisIndex: 0,
+        filterMode: 'filter',
+      },
+      {
+        type: 'inside',
+        xAxisIndex: 0,
+        filterMode: 'filter',
+      },
+    ]
   }
+
+  const zoomOptions = (
+    enableZoom ?
+      (
+        enableAutoZoom ?
+          autoZoomOptions :
+          manualZoomOptions
+      ) :
+      {}
+  )
 
   return {
     ...basic_line_options,
-    ...(enableZoom ? zoomOptions : noZoomOptions)
+    ...toolBoxOptions,
+    ...zoomOptions,
   }
 }
 
 
 export function EChart({ myData }: ChartProps) {
   const [zoomEnabled, setEnableZoom] = useState(false);
+  const [autoZoomEnabled, setAutoZoomEnabled] = useState(false);
   const [echartsObject, setEchartsObject] = useState<EChartsType | undefined>(undefined)
   const [chartData, setChartData] = useState<LineChartData>([])
 
@@ -89,26 +114,30 @@ export function EChart({ myData }: ChartProps) {
 
   useEffect(() => {
     const setOptionOptions = {
-      notMerge: true,
-      lazyUpdate: false
+      notMerge: true
     }
     if (echartsObject !== undefined) {
-      echartsObject.setOption(createEChartsOptions(chartData, zoomEnabled), setOptionOptions);
+      echartsObject.setOption(createEChartsOptions(chartData, zoomEnabled, autoZoomEnabled), setOptionOptions);
     }
-  }, [zoomEnabled, echartsObject, chartData])
+  }, [zoomEnabled, echartsObject, chartData, autoZoomEnabled])
 
   return (
     <ChartBox title="Apache ECharts">
       <Box sx={{ backgroundColor: "white" }}>
         <ReactECharts
-          option={createEChartsOptions([], false)}
+          option={createEChartsOptions([], false, true)}
           // theme={"dark"}
           style={{ height: 300, width: 500 }}
           lazyUpdate={true}
           onChartReady={setEchartsObject}
         />
       </Box>
-      <Button onClick={() => setEnableZoom((prev) => !prev)}>{zoomEnabled ? "Disable Zoom" : "Enable Zoom"}</Button>
+      <ChartButton boolState={zoomEnabled} setBoolState={setEnableZoom}>
+        {zoomEnabled ? "Zoom Enabled" : "Zoom Disabled"}
+      </ChartButton>
+      <ChartButton boolState={autoZoomEnabled} setBoolState={setAutoZoomEnabled}>
+        {autoZoomEnabled ? "Auto Zoom" : "Manual Zoom"}
+      </ChartButton>
     </ChartBox >
   )
 }
